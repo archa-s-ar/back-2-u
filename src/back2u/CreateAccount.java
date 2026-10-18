@@ -9,6 +9,7 @@ public class CreateAccount extends JFrame implements ActionListener{
     JTextField nametextfield,mailtextfield,phntextfield;
     JPasswordField password;
     JCheckBox terms;
+    JButton create;
     
     CreateAccount(){
           
@@ -63,12 +64,25 @@ public class CreateAccount extends JFrame implements ActionListener{
         terms.setBackground(Color.WHITE);
         add(terms);
         
-        JButton create = new JButton("Create Account");
+        create =new JButton("Create Account");
         create.setFont(new Font("Raleway",Font.BOLD,16));
         create.setBounds(250,350,200,30);
-        add(create); 
+        create.addActionListener(this);
+        add(create);
         
-        
+        /*create.addActionListener(e->{
+         String passwordl = new String(password.getPassword());
+         if(passwordl.length()<8){
+             JOptionPane.showMessageDialog(this,"password must contain 8 characters");
+         }
+         else if(!passwordl.matches(".*[0-9].*")){
+             JOptionPane.showMessageDialog( this,"password must contain a digit");
+         }
+         else{
+             JOptionPane.showMessageDialog( this,"password created successfully");
+             
+         }
+     });*/
         
         getContentPane().setBackground(Color.WHITE);
         
@@ -77,7 +91,34 @@ public class CreateAccount extends JFrame implements ActionListener{
         setVisible(true);
     }
     public void actionPerformed(ActionEvent ae){
-        
+        if(ae.getSource()==create){
+            
+         String passwordl = new String(password.getPassword());
+         String fname= nametextfield.getText();
+         String email= mailtextfield.getText();
+         String phone=phntextfield.getText();
+         
+         if(passwordl.length()<8){
+             JOptionPane.showMessageDialog(this,"password must contain 8 characters");
+         }
+         else if(!passwordl.matches(".*[0-9].*")){
+             JOptionPane.showMessageDialog( this,"password must contain a digit");
+         }
+         else{
+             try{
+                 Conn c= new Conn();
+                 String query= "insert into accountdetails values('"+fname+"','"+email+"','"+phone+"','"+passwordl+"')";
+                 c.s.executeUpdate(query);
+                 JOptionPane.showMessageDialog( null,"Account created successfully");
+             }
+             catch(Exception e){
+                 System.out.println(e);
+             }
+             
+             
+             
+         }
+        }
         
     }
     
@@ -85,6 +126,6 @@ public class CreateAccount extends JFrame implements ActionListener{
         
         new CreateAccount();
         
-    } 
+    }
     
 }
