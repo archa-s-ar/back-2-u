@@ -806,10 +806,10 @@ Back2U can be extended with:
 
 ### Contributors
 
-- **[Member 1]**
-- **[Member 2]**
-- **[Member 3]**
-- **[Member 4]**
+- **Aadithya K**
+- **Archa S**
+- **Gitto George**
+- **Sreedurga P**
 
 ---
 
