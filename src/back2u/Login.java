@@ -92,7 +92,7 @@ public class Login extends JFrame implements ActionListener{
              try {
             Conn con = new Conn();
 
-            String query = "SELECT * FROM users WHERE email='"
+            String query = "SELECT * FROM accountdetails WHERE email='"
                     + mail + "' AND password='" + Pass + "'";
 
            java.sql.ResultSet rs = con.s.executeQuery(query);
