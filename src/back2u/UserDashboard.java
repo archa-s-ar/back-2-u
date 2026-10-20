@@ -66,7 +66,6 @@ public class UserDashboard extends JFrame implements ActionListener{
     public void actionPerformed(ActionEvent e) {
 
     if (e.getSource() == lostBtn) {
-        setVisible(false);
         new ReportLostItem(userId).setVisible(true);
     }
     else if (e.getSource() == foundBtn) {
@@ -78,9 +77,7 @@ public class UserDashboard extends JFrame implements ActionListener{
         );
     }
     else if (e.getSource() == adminBtn) {
-        JOptionPane.showMessageDialog(
-            this, "Report to Admin will be available here."
-        );
+        new AdminReport(userId).setVisible(true);
     }
 }
     
