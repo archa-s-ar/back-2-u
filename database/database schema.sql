@@ -10,7 +10,6 @@ SELECT * from accountdetails;
 
 /*CREATE TABLE items (
     item_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
     report_type ENUM('LOST','FOUND'),
     item_name VARCHAR(100),
     category VARCHAR(50),
