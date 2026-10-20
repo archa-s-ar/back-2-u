@@ -3,7 +3,9 @@ package back2u;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.time.LocalDateTime;
+import java.sql.PreparedStatement;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 
 public class ReportFounditem extends JFrame implements ActionListener{
@@ -74,7 +76,7 @@ public class ReportFounditem extends JFrame implements ActionListener{
             add(Datefound);
             
             DateText=new JTextField();
-            DateText.setToolTipText("Enter the date as dd-mm-yyyy");
+            DateText.setToolTipText("Enter the date as yyyy-mm-dd");
             DateText.setBounds(150,450,300,30);
             add(DateText);
             
@@ -141,38 +143,110 @@ public class ReportFounditem extends JFrame implements ActionListener{
             category.setSelectedIndex(0);
             JOptionPane.showMessageDialog(this,"Form Cleared Successfully");
         }
-        else if(e.getSource()==Submit){
-            if(category.getSelectedIndex()==0||Itemtext.getText().trim().isEmpty()||Descriptiontext.getText().trim().isEmpty()||
-                 DateText.getText().trim().isEmpty()|| TimeText.getText().trim().isEmpty()||Locationtext.getText().trim().isEmpty()){
-                JOptionPane.showMessageDialog(this,"Please fill in required fields");
-                
+       else if (e.getSource() == Submit) {
+
+            // Validate required fields
+            if (category.getSelectedIndex() == 0
+                    || Itemtext.getText().trim().isEmpty()
+                    || Descriptiontext.getText().trim().isEmpty()
+                    || DateText.getText().trim().isEmpty()
+                    || TimeText.getText().trim().isEmpty()
+                    || Locationtext.getText().trim().isEmpty()) {
+
+                JOptionPane.showMessageDialog(
+                        this, "Please fill in required fields");
             }
-            else{
-                JOptionPane.showMessageDialog(this,"Found item reported Successfully");
-                LocalDateTime currentDateTime =LocalDateTime.now();
-                try{
-                 Conn c= new Conn();
-                 String query = "INSERT INTO items(report_type,item_name,category,description,date_occured,time_occured,location,status,created_at) VALUES ("
-                                    +"'FOUND','"
-                    + Itemtext.getText().trim() + "', '"
-                    + category.getSelectedItem().toString() + "', '"
-                    + Descriptiontext.getText().trim() + "', '"
-                    + DateText.getText().trim() + "', '"
-                    + TimeText.getText().trim() + "', '"
-                    + Locationtext.getText().trim() + "', 'OPEN', '"
-                    + currentDateTime + "')";    
-                    c.s.executeUpdate(query);
-                  JOptionPane.showMessageDialog( null,"item reported successfully");
+
+            else {
+
+                try {
+                    // Get values from the form
+                    String itemName = Itemtext.getText().trim();
+                    String itemCategory =
+                            category.getSelectedItem().toString();
+                    String description =
+                            Descriptiontext.getText().trim();
+                    String time = TimeText.getText().trim();
+                    String location = Locationtext.getText().trim();
+                    String uniqueDetails = Uniquetext.getText().trim();
+
+                    // Convert yyyy-MM-dd text into a date
+                    DateTimeFormatter formatter =
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+                    LocalDate foundDate =
+                            LocalDate.parse(
+                                    DateText.getText().trim(), formatter);
+
+                    // Connect to the database
+                    Conn con = new Conn();
+
+                    if (con.c == null) {
+                        throw new Exception(
+                                "Database connection failed. Check Conn.java.");
+                    }
+
+                    // Insert the report into the existing items table
+                    String query =
+                            "INSERT INTO items " +
+                            "(report_type, item_name, category, description, " +
+                            "date_occurred, time_occurred, location, status, " +
+                            "unique_details) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                    try (PreparedStatement ps =
+                            con.c.prepareStatement(query)) {
+
+                        ps.setString(1, "FOUND");
+                        ps.setString(2, itemName);
+                        ps.setString(3, itemCategory);
+                        ps.setString(4, description);
+                        ps.setDate(5,
+                                java.sql.Date.valueOf(foundDate));
+                        ps.setString(6, time);
+                        ps.setString(7, location);
+                        ps.setString(8, "OPEN");
+                        ps.setString(9, uniqueDetails);
+
+                        int rows = ps.executeUpdate();
+
+                        if (rows > 0) {
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Found item reported successfully!");
+
+                            // Clear fields after successful insertion
+                            Itemtext.setText("");
+                            Descriptiontext.setText("");
+                            DateText.setText("");
+                            TimeText.setText("");
+                            Locationtext.setText("");
+                            Uniquetext.setText("");
+                            category.setSelectedIndex(0);
+                        }
+                    }
+
+                    con.c.close();
+
+                } catch (java.time.format.DateTimeParseException ex) {
+
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Enter a valid date in yyyy-MM-dd format.\n"
+                            + "Example: 2026-10-20");
+
+                } catch (Exception ex) {
+
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Could not save report: " + ex.getMessage());
+
+                    ex.printStackTrace();
                 }
-                catch(Exception ex){
-                     System.out.println(ex);
-                }
-            }       
-                
-    
+            }
         }
-        
     }
+
      public static void main (String args[]){
         new ReportFounditem();
      }
