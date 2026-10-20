@@ -154,9 +154,9 @@ public class CreateAccount extends JFrame implements ActionListener{
              }
          }
         else if(ae.getSource()==back){
-        
         }
-         //login page
+            setVisible(false);
+            new Login().setVisible(true);
         }
     
     public static void main (String args[]){

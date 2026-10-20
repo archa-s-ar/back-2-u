@@ -351,8 +351,9 @@ public class AdminDashboard extends JFrame implements ActionListener{
                     JOptionPane.YES_NO_OPTION);
 
                     if (choice == JOptionPane.YES_OPTION) {
+                        setVisible(false);
+                        new Login().setVisible(true);
                         dispose();
-                        // Open your Login window here if required.
                     }
                 break;
                     

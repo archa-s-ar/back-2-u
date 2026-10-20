@@ -89,6 +89,12 @@ public class Login extends JFrame implements ActionListener{
              JOptionPane.showMessageDialog(this,"Please enter email and password");
          }
          else{
+             if (mail.equals("admin@gmail.com")&&(Pass.equals("admin"))){
+                 setVisible(false);
+                 new AdminDashboard().setVisible(true);
+             }
+             
+             else{
              try {
             Conn con = new Conn();
 
@@ -111,6 +117,7 @@ public class Login extends JFrame implements ActionListener{
             JOptionPane.showMessageDialog(this,
                     "Error: " + ex.getMessage());
         }
+             }
     
 
              
@@ -127,7 +134,8 @@ public class Login extends JFrame implements ActionListener{
      }
      }
      else if (ev.getSource() == createacc) {
-            new CreateAccount();
+            setVisible(false);
+            new CreateAccount().setVisible(true);
             dispose();
      }
  }
