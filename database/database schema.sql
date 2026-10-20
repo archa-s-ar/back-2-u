@@ -8,8 +8,12 @@ show tables;
 
 SELECT * from accountdetails;
 
+/*drop table items;*/
+
+
 /*CREATE TABLE items (
     item_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
     report_type ENUM('LOST','FOUND'),
     item_name VARCHAR(100),
     category VARCHAR(50),
@@ -19,7 +23,11 @@ SELECT * from accountdetails;
     location VARCHAR(200),
     status VARCHAR(30) DEFAULT 'OPEN',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    unique_details VARCHAR(500)
+    unique_details VARCHAR(500),
+
+    CONSTRAINT fk_items_user
+        FOREIGN KEY (user_id)
+        REFERENCES accountdetails(user_id)
 );*/
 
 SELECT * FROM items;
