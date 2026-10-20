@@ -7,3 +7,20 @@ USE back2u;
 show tables;
 
 SELECT * from accountdetails;
+
+/*CREATE TABLE items (
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    report_type ENUM('LOST','FOUND'),
+    item_name VARCHAR(100),
+    category VARCHAR(50),
+    description VARCHAR(500),
+    date_occurred DATE,
+    time_occurred VARCHAR(50),
+    location VARCHAR(200),
+    status VARCHAR(30) DEFAULT 'OPEN',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    unique_details VARCHAR(500)
+);*/
+
+SELECT * FROM items;
