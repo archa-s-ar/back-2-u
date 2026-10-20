@@ -70,7 +70,6 @@ public class UserDashboard extends JFrame implements ActionListener{
         new ReportLostItem(userId).setVisible(true);
     }
     else if (e.getSource() == foundBtn) {
-        setVisible(false);
         new ReportFounditem().setVisible(true);
     }
     else if (e.getSource() == notificationsBtn) {
