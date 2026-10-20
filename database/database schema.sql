@@ -34,7 +34,7 @@ SELECT * FROM items;
 CREATE DATABASE IF NOT EXISTS back2u;
 USE back2u;
 
-CREATE TABLE IF NOT EXISTS handover (
+/*CREATE TABLE IF NOT EXISTS handover (
     handover_id INT PRIMARY KEY AUTO_INCREMENT,
     item_name VARCHAR(100),
     category VARCHAR(50),
@@ -63,4 +63,17 @@ INSERT INTO handover (
     'Archa S', '22IT3456', '9876543210',
     'Main Block (Entrance)', '2026-10-16',
     '3:30 PM', '478291'
-);
+);*/
+
+/*CREATE TABLE admin_reports (
+    report_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    issue_type VARCHAR(100) NOT NULL,
+    subject VARCHAR(150) NOT NULL,
+    description TEXT NOT NULL,
+    status VARCHAR(30) DEFAULT 'OPEN',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES accountdetails(user_id)
+);*/
+
+SELECT * from admin_reports;
