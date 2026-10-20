@@ -3,6 +3,7 @@ package back2u;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.LocalDateTime;
 
 
 public class ReportFounditem extends JFrame implements ActionListener{
@@ -12,7 +13,7 @@ public class ReportFounditem extends JFrame implements ActionListener{
     JButton Cancel, Submit;
     ReportFounditem(){
         setTitle("Report Found Item");
-        setSize(500,800);
+        setSize(500,850);
         setLocation(300,0);
         setLayout(null);
         JLabel heading=new JLabel("Report Found Item");
@@ -100,10 +101,10 @@ public class ReportFounditem extends JFrame implements ActionListener{
              Additional.setBounds(40,610,300,30);
              add(Additional);
              
-             JLabel Unique=new JLabel("Additional details "
-                     + "like how it was kept :");
+             JLabel Unique=new JLabel("<html>Additional details <br>like how it was kept:</html>"
+                     );
              Unique.setFont(new Font("raleway",Font.BOLD,16));
-             Unique.setBounds(40,650,165,30);
+             Unique.setBounds(40,650,165,40);
              add(Unique);
              
              Uniquetext=new JTextArea();
@@ -148,7 +149,26 @@ public class ReportFounditem extends JFrame implements ActionListener{
             }
             else{
                 JOptionPane.showMessageDialog(this,"Found item reported Successfully");
-            }
+                LocalDateTime currentDateTime =LocalDateTime.now();
+                try{
+                 Conn c= new Conn();
+                 String query = "INSERT INTO items(report_type,item_name,category,description,date_occured,time_occured,location,status,created_at) VALUES ("
+                                    +"'FOUND','"
+                    + Itemtext.getText().trim() + "', '"
+                    + category.getSelectedItem().toString() + "', '"
+                    + Descriptiontext.getText().trim() + "', '"
+                    + DateText.getText().trim() + "', '"
+                    + TimeText.getText().trim() + "', '"
+                    + Locationtext.getText().trim() + "', 'OPEN', '"
+                    + currentDateTime + "')";    
+                    c.s.executeUpdate(query);
+                  JOptionPane.showMessageDialog( null,"item reported successfully");
+                }
+                catch(Exception ex){
+                     System.out.println(ex);
+                }
+            }       
+                
     
         }
         
