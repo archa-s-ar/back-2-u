@@ -138,6 +138,11 @@ public class ReportFounditem extends JFrame implements ActionListener{
     }
     public void actionPerformed(ActionEvent e){
         if(e.getSource()==Cancel){
+            int choice=JOptionPane.showConfirmDialog(
+            this,"Do you want to clear the form and close it?",
+            "Confirm cancel",
+            JOptionPane.YES_NO_OPTION);
+            if(choice==JOptionPane.YES_OPTION){
             Itemtext.setText("");
             Descriptiontext.setText("");
             DateText.setText("");
@@ -146,6 +151,8 @@ public class ReportFounditem extends JFrame implements ActionListener{
             Uniquetext.setText("");
             category.setSelectedIndex(0);
             JOptionPane.showMessageDialog(this,"Form Cleared Successfully");
+            dispose();
+            }
         }
        else if (e.getSource() == Submit) {
 

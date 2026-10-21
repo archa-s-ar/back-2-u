@@ -122,6 +122,7 @@ public class matchfound extends JFrame {
         btnNotMatch.addActionListener(e -> {
             JOptionPane.showMessageDialog(frame, "Match rejected.");
             frame.dispose();
+            
         });
 
         btnPanel.add(btnViewDetails);
