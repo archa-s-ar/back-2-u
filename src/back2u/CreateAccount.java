@@ -16,6 +16,7 @@ public class CreateAccount extends JFrame implements ActionListener{
         setTitle("CREATE ACCOUNT");
         
         setLayout(null);
+        getContentPane().setBackground(new Color(245,242,255));
         
         JLabel head = new JLabel("CREATE ACCOUNT");
         head.setBounds(300,100,300,30);
@@ -94,7 +95,7 @@ public class CreateAccount extends JFrame implements ActionListener{
         back.addActionListener(this);
         add(back);
         
-        getContentPane().setBackground(Color.WHITE);
+        /*getContentPane().setBackground(Color.WHITE);*/
         
         setSize(900,900);
         setLocation(300,0);

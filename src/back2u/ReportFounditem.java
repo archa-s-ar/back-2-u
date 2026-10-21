@@ -15,7 +15,7 @@ public class ReportFounditem extends JFrame implements ActionListener{
     JButton Cancel, Submit;
     ReportFounditem(){
         setTitle("Report Found Item");
-        setSize(500,850);
+        setSize(900,820);
         setLocation(300,0);
         setLayout(null);
         JLabel heading=new JLabel("Report Found Item");
