@@ -8,7 +8,7 @@ Back2U is a Java Swing desktop application that helps students report lost and f
 
 Instead of relying on scattered WhatsApp groups, class groups, notice boards, or word of mouth, Back2U provides a centralized workflow for reporting items, reviewing possible matches, confirming a match, and arranging a handover.
 
-> **Project status:** Under development. See the current implementation and testing notes below; not every planned feature is necessarily complete.
+> **Project status:** Completed
 
 ---
 
