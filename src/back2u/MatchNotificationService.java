@@ -20,25 +20,28 @@ public static class Notification {
     public String status;
     public String role;
     public String myResponse;
-
+    public String finderResponse;
+    
     public Notification(
-            int matchId, int lostItemId, int foundItemId,
-            int score, String lostName, String foundName,
-            String location, String status, String role,
-            String myResponse, String ownerResponse) {
+        int matchId, int lostItemId, int foundItemId,
+        int score, String lostName, String foundName,
+        String location, String status, String role,
+        String myResponse, String ownerResponse,
+        String finderResponse) {
 
-        this.matchId = matchId;
-        this.lostItemId = lostItemId;
-        this.foundItemId = foundItemId;
-        this.score = score;
-        this.lostName = lostName;
-        this.foundName = foundName;
-        this.location = location;
-        this.status = status;
-        this.role = role;
-        this.myResponse = myResponse;
-        this.ownerResponse = ownerResponse;
-    }
+    this.matchId = matchId;
+    this.lostItemId = lostItemId;
+    this.foundItemId = foundItemId;
+    this.score = score;
+    this.lostName = lostName;
+    this.foundName = foundName;
+    this.location = location;
+    this.status = status;
+    this.role = role;
+    this.myResponse = myResponse;
+    this.ownerResponse = ownerResponse;
+    this.finderResponse = finderResponse;
+}
 }
 
 
@@ -117,7 +120,8 @@ public static class Notification {
                     rs.getString("match_status"),
                     role,
                     response,
-                    rs.getString("owner_response")
+                    rs.getString("owner_response"),
+                    rs.getString("finder_response")
                     ));
                 }
             }
@@ -259,12 +263,15 @@ public static class Notification {
         "SET i.status = 'MATCHED' " +
         "WHERE im.match_id = ? " +
         "AND im.owner_response = 'CONFIRMED' " +
-        "AND im.finder_response = 'CONFIRMED' " +
-        "AND im.match_status = 'VERIFICATION'";
+        "AND im.finder_response = 'CONFIRMED'";
 
     try (PreparedStatement ps = con.prepareStatement(sql)) {
         ps.setInt(1, matchId);
-        ps.executeUpdate();
+
+        int updated = ps.executeUpdate();
+
+        System.out.println(
+            "Item records updated to MATCHED: " + updated);
     }
 }
 }
