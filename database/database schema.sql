@@ -105,5 +105,6 @@ SELECT * from admin_reports;
         REFERENCES items(item_id)
 );*/
 
+SELECT * FROM items;
 
 
