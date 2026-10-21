@@ -2,13 +2,12 @@
 
 USE back2u;
 
-/*CREATE TABLE accountdetails(user_id int auto_increment primary key ,name varchar(100), student_id varchar(20), email varchar(50),phone varchar(10), password varchar(50));*/
-
-show tables;
-
-SELECT * from accountdetails;
-
-/*drop table items;*/
+/*CREATE TABLE accountdetails(user_id int auto_increment primary key ,
+								name varchar(100), 
+								student_id varchar(20), 
+                                email varchar(50),
+                                phone varchar(10), 
+                                password varchar(50));*/
 
 
 /*CREATE TABLE items (
@@ -30,31 +29,6 @@ SELECT * from accountdetails;
         REFERENCES accountdetails(user_id)
 );*/
 
-SELECT * FROM items;
-CREATE DATABASE IF NOT EXISTS back2u;
-USE back2u;
-
-/*CREATE TABLE handover (
-    handover_id INT AUTO_INCREMENT PRIMARY KEY,
-    match_id INT NOT NULL UNIQUE,
-
-    meeting_location VARCHAR(200) NOT NULL,
-    meeting_date DATE NOT NULL,
-    meeting_time VARCHAR(20) NOT NULL,
-    instructions VARCHAR(500),
-
-    pin VARCHAR(6) NOT NULL,
-    status ENUM('PENDING', 'COMPLETED')
-        DEFAULT 'PENDING',
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    returned_at DATETIME NULL,
-
-    CONSTRAINT fk_handover_match
-        FOREIGN KEY (match_id)
-        REFERENCES item_matches(match_id)
-);*/
-
 
 
 /*CREATE TABLE admin_reports (
@@ -67,9 +41,6 @@ USE back2u;
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES accountdetails(user_id)
 );*/
-
-SELECT * from admin_reports;
-
 
 
 /*CREATE TABLE IF NOT EXISTS item_matches (
@@ -97,5 +68,24 @@ SELECT * from admin_reports;
         REFERENCES items(item_id)
 );*/
 
+/*CREATE TABLE handover (
+    handover_id INT AUTO_INCREMENT PRIMARY KEY,
+    match_id INT NOT NULL UNIQUE,
 
+    meeting_location VARCHAR(200) NOT NULL,
+    meeting_date DATE NOT NULL,
+    meeting_time VARCHAR(20) NOT NULL,
+    instructions VARCHAR(500),
+
+    pin VARCHAR(6) NOT NULL,
+    status ENUM('PENDING', 'COMPLETED')
+        DEFAULT 'PENDING',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    returned_at DATETIME NULL,
+
+    CONSTRAINT fk_handover_match
+        FOREIGN KEY (match_id)
+        REFERENCES item_matches(match_id)
+);*/
 
