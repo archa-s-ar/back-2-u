@@ -27,7 +27,7 @@ public class PossibleMatches extends JFrame {
                 "Description", "Location", "Date", "Match Score"
             }, 0
         ) {
-            @Override
+            
             public boolean isCellEditable(int row, int column) {
                 return false;
             }

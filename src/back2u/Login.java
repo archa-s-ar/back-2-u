@@ -3,7 +3,9 @@ package back2u;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 
 public class Login extends JFrame implements ActionListener{
@@ -82,47 +84,69 @@ public class Login extends JFrame implements ActionListener{
     
 
  public void actionPerformed(ActionEvent ev){
-     if(ev.getSource()==login){
-         String mail=emailtxt.getText().trim();
-         String Pass=new String(passtxt.getPassword());
-         if(mail.isEmpty()||Pass.isEmpty()){
-             JOptionPane.showMessageDialog(this,"Please enter email and password");
-         }
-         else{
-             if (mail.equals("admin@gmail.com")&&(Pass.equals("admin"))){
-                 setVisible(false);
-                 new AdminDashboard().setVisible(true);
-             }
-             
-             else{
-             try {
-            Conn con = new Conn();
+     
+if (ev.getSource() == login) {
 
-            String query = "SELECT * FROM accountdetails WHERE email='"
-                    + mail + "' AND password='" + Pass + "'";
+    String mail = emailtxt.getText().trim();
+    String pass = new String(passtxt.getPassword());
 
-           java.sql.ResultSet rs = con.s.executeQuery(query);
+    if (mail.isEmpty() || pass.isEmpty()) {
+        JOptionPane.showMessageDialog(
+            this, "Please enter email and password.");
+        return;
+    }
 
-            if (rs.next()) {
-                JOptionPane.showMessageDialog(this,
-                        "Login successful!");
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Invalid email or password");
+    // Admin login
+    if (mail.equals("admin@gmail.com") && pass.equals("admin")) {
+        dispose();
+        new AdminDashboard().setVisible(true);
+        return;
+    }
+
+    String query =
+        "SELECT user_id FROM accountdetails "
+        + "WHERE email = ? AND password = ?";
+
+    try {
+        Conn con = new Conn();
+
+        if (con.c == null) {
+            JOptionPane.showMessageDialog(
+                this, "Database connection failed.");
+            return;
+        }
+
+        try (PreparedStatement ps = con.c.prepareStatement(query)) {
+            ps.setString(1, mail);
+            ps.setString(2, pass);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+
+                    int userId = rs.getInt("user_id");
+
+                    JOptionPane.showMessageDialog(
+                        this, "Login successful!");
+
+                    dispose();
+                    new UserDashboard(userId);
+
+                } else {
+                    JOptionPane.showMessageDialog(
+                        this, "Invalid email or password.");
+                }
             }
-
+        } finally {
             con.c.close();
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Error: " + ex.getMessage());
         }
-             }
-    
 
-             
-          }
-        }
+    } catch (SQLException ex) {
+        JOptionPane.showMessageDialog(
+            this, "Login error: " + ex.getMessage());
+        ex.printStackTrace();
+    }
+}
+
     
      
      else if (ev.getSource() == forgot) {
