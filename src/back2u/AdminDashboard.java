@@ -10,11 +10,11 @@ import javax.swing.table.DefaultTableModel;
 
 public class AdminDashboard extends JFrame implements ActionListener{
     private JTable userTable, lostItemsTable, foundItemsTable,reportTable;
-    private JLabel totalUsersCount;
-    private JLabel lostReportsCount;
-    private JLabel foundReportsCount;
+    private JLabel totalUsersCount,lostReportsCount,foundReportsCount;
     private CardLayout cardLayout;
     private JPanel contentCards;
+    private JButton updateStatusBtn,refreshBtn;
+    private JComboBox statusBox;
 
             AdminDashboard(){
                 setTitle("Back2U - Admin Dashboard");
@@ -94,10 +94,42 @@ public class AdminDashboard extends JFrame implements ActionListener{
             summary.add(lostItemsCard);
             summary.add(foundItemsCard);
             
+            
             mainContent.setLayout(new BorderLayout(10, 20));
-            mainContent.add(summary, BorderLayout.NORTH);
+
+        //Create Refresh button
+            refreshBtn = new JButton("Refresh");
+            refreshBtn.setFont(new Font("Raleway", Font.BOLD, 14));
+            refreshBtn.setBackground(new Color(91, 72, 157));
+            refreshBtn.setForeground(Color.WHITE);
+            refreshBtn.setFocusPainted(false);
+            refreshBtn.addActionListener(e -> refreshDashboard());
+
+         //Create the top panel
+            JPanel topPanel = new JPanel(new BorderLayout(10, 10));
+            topPanel.setBackground(new Color(245, 247, 250));
+            topPanel.add(summary, BorderLayout.CENTER);
+
+            //Place Refresh button on the right
+            JPanel refreshPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            refreshPanel.setBackground(new Color(245, 247, 250));
+            refreshPanel.add(refreshBtn);
+
+            topPanel.add(refreshPanel, BorderLayout.SOUTH);
+
+            //Add the complete panel to the dashboard
+            mainContent.add(topPanel, BorderLayout.NORTH);
+
             
-            
+            /*REFRESH BUTTON*/
+            refreshBtn = new JButton("Refresh");
+            refreshBtn.setFont(new Font("Raleway", Font.BOLD, 14));
+            refreshBtn.setBackground(new Color(91, 72, 157));
+            refreshBtn.setForeground(Color.WHITE);
+            refreshBtn.setFocusPainted(false);
+
+            refreshBtn.addActionListener(e -> refreshDashboard());
+
             /*TABLE*/
             
         userTable = createTable(new String[]{"Name", "Student ID", "Email", "Phone"});
@@ -106,7 +138,7 @@ public class AdminDashboard extends JFrame implements ActionListener{
 
         foundItemsTable = createTable(new String[]{"Item ID", "Item Name", "Category", "Description","Location", "Reported By", "Date Reported","Time Reported", "Status"});
         
-        reportTable = createTable(new String[]{"Report ID","Reported by","Report Type","Item Category","Issue faced","Date Reported","Status", });
+        reportTable = createTable(new String[]{"Report ID", "Reported By", "Issue Type","Subject", "Description", "Date Reported", "Status"});
             
             
             JScrollPane scrollPane = new JScrollPane(userTable);
@@ -123,12 +155,28 @@ public class AdminDashboard extends JFrame implements ActionListener{
             loadDashboardCounts();
             loadItems("LOST", lostItemsTable);
             loadItems("FOUND", foundItemsTable);
+            loadAdminReports();
 
                 JPanel lostItemsPanel =createItemsPanel("Lost Items", lostItemsTable);
 
                 JPanel foundItemsPanel =createItemsPanel("Found Items", foundItemsTable);
 
                 JPanel reportsPanel = createItemsPanel("Reports", reportTable);
+                
+                JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+                statusBox = new JComboBox<>(new String[]{"OPEN", "IN_PROGRESS", "RESOLVED"});
+
+                updateStatusBtn = new JButton("Update Status");
+                updateStatusBtn.addActionListener(e -> updateReportStatus());
+
+                statusPanel.add(new JLabel("Set Status:"));
+                statusPanel.add(statusBox);
+                statusPanel.add(updateStatusBtn);
+
+                reportsPanel.add(statusPanel, BorderLayout.SOUTH);
+                
+
                 //CONTENT CARDS
                 cardLayout = new CardLayout();
 
@@ -322,6 +370,129 @@ public class AdminDashboard extends JFrame implements ActionListener{
             "Could not load item records: " + e.getMessage()
         );
     }
+}
+    
+    
+private void loadAdminReports() {
+    String query =
+        "SELECT r.report_id, a.name AS reporter, " +
+        "r.issue_type, r.subject, r.description, " +
+        "r.created_at, r.status " +
+        "FROM admin_reports r " +
+        "LEFT JOIN accountdetails a ON r.user_id = a.user_id " +
+        "ORDER BY r.created_at DESC";
+
+    try {
+        Conn c = new Conn();
+
+        try (PreparedStatement ps = c.c.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+
+            DefaultTableModel model =
+                (DefaultTableModel) reportTable.getModel();
+
+            model.setRowCount(0);
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getInt("report_id"),
+                    rs.getString("reporter"),
+                    rs.getString("issue_type"),
+                    rs.getString("subject"),
+                    rs.getString("description"),
+                    rs.getTimestamp("created_at"),
+                    rs.getString("status")
+                });
+            }
+        } finally {
+            if (c.c != null) {
+                c.c.close();
+            }
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Could not load admin reports: " + e.getMessage(),
+            "Database Error",
+            JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+
+private void updateReportStatus() {
+    int selectedRow = reportTable.getSelectedRow();
+
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(
+            this,
+            "Please select a report first."
+        );
+        return;
+    }
+
+    // Convert the selected view row to its actual model row.
+    int modelRow = reportTable.convertRowIndexToModel(selectedRow);
+
+    int reportId = Integer.parseInt(
+        reportTable.getModel().getValueAt(modelRow, 0).toString()
+    );
+
+    String newStatus = (String) statusBox.getSelectedItem();
+
+    String query =
+        "UPDATE admin_reports SET status = ? WHERE report_id = ?";
+
+    try {
+        Conn c = new Conn();
+
+        try (PreparedStatement ps = c.c.prepareStatement(query)) {
+            ps.setString(1, newStatus);
+            ps.setInt(2, reportId);
+
+            int rows = ps.executeUpdate();
+
+            if (rows > 0) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Report status updated to " + newStatus + "."
+                );
+
+                loadAdminReports();
+            } else {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Report not found."
+                );
+            }
+        } finally {
+            if (c.c != null) {
+                c.c.close();
+            }
+        }
+
+    } catch (SQLException ex) {
+        JOptionPane.showMessageDialog(
+            this,
+            "Could not update report status: " + ex.getMessage(),
+            "Database Error",
+            JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+private void refreshDashboard() {
+    loadUsers();
+    loadDashboardCounts();
+    loadItems("LOST", lostItemsTable);
+    loadItems("FOUND", foundItemsTable);
+    loadAdminReports();
+
+    JOptionPane.showMessageDialog(
+        this,
+        "Dashboard refreshed successfully!"
+    );
 }
     
     public void actionPerformed(ActionEvent ae){
