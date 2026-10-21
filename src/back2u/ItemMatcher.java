@@ -23,67 +23,38 @@ public class ItemMatcher {
             String lostUniqueDetails,
             String foundUniqueDetails) {
 
-        
-        
-int nameScore = textSimilarityScore(
-    lostName, foundName, 20
-);
+        int score = 0;
 
-int descScore = textSimilarityScore(
-    lostDescription, foundDescription, 25
-);
+        // 1. Item name: 20 points
+        score += textScore(lostName, foundName, 20);
 
-int locScore = locationScore(
-    lostLocation, foundLocation
-);
-
-int datePoints = dateScore(
-    lostDate, foundDate
-);
-
-int categoryPoints =
-    sameText(lostCategory, foundCategory) ? 10 : 0;
-
-int uniqueScore = textSimilarityScore(
-    lostUniqueDetails, foundUniqueDetails, 5
-);
-
-System.out.println("Name score: " + nameScore);
-System.out.println("Description score: " + descScore);
-System.out.println("Location score: " + locScore);
-System.out.println("Date score: " + datePoints);
-System.out.println("Category score: " + categoryPoints);
-System.out.println("Unique details score: " + uniqueScore);
-
-int score = nameScore + descScore + locScore
-    + datePoints + categoryPoints + uniqueScore;
-
-System.out.println("Total score: " + score);
-
-return Math.min(score, 100);
-
-
-        /*int score = 0;
-
-        score += textSimilarityScore(lostName, foundName, 20);
-        score += textSimilarityScore(
+        // 2. Description: 25 points
+        score += textScore(
             lostDescription, foundDescription, 25
         );
-        score += locationScore(lostLocation, foundLocation);
+
+        // 3. Location: 25 points
+        score += locationScore(
+            lostLocation, foundLocation
+        );
+
+        // 4. Date: 15 points
         score += dateScore(lostDate, foundDate);
 
+        // 5. Category: 10 points
         if (sameText(lostCategory, foundCategory)) {
             score += 10;
         }
 
-        score += textSimilarityScore(
+        // 6. Unique details: 5 points
+        score += textScore(
             lostUniqueDetails, foundUniqueDetails, 5
         );
 
-        return Math.min(score, 100);*/
+        return Math.min(score, 100);
     }
 
-    private static int textSimilarityScore(
+    private static int textScore(
             String a, String b, int maxPoints) {
 
         Set<String> wordsA = words(a);
@@ -106,6 +77,7 @@ return Math.min(score, 100);
     }
 
     private static Set<String> words(String text) {
+
         Set<String> result = new HashSet<>();
 
         if (text == null || text.trim().isEmpty()) {
@@ -126,6 +98,7 @@ return Math.min(score, 100);
     }
 
     private static int locationScore(String a, String b) {
+
         if (a == null || b == null
                 || a.trim().isEmpty()
                 || b.trim().isEmpty()) {
