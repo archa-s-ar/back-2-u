@@ -50,9 +50,9 @@ USE back2u;
     pin VARCHAR(6),
     status VARCHAR(20) DEFAULT 'PENDING',
     returned_at DATETIME
-);
+);*/
 
-INSERT INTO handover (
+/*INSERT INTO handover (
     item_name, category, description, found_date,
     found_location, owner_name, reg_no, phone,
     meeting_location, meeting_date, meeting_time, pin
@@ -77,3 +77,33 @@ INSERT INTO handover (
 );*/
 
 SELECT * from admin_reports;
+
+
+
+/*CREATE TABLE IF NOT EXISTS item_matches (
+    match_id INT AUTO_INCREMENT PRIMARY KEY,
+    lost_item_id INT NOT NULL,
+    found_item_id INT NOT NULL,
+    match_score INT NOT NULL,
+    owner_response ENUM(
+        'PENDING', 'CONFIRMED', 'REJECTED'
+    ) DEFAULT 'PENDING',
+    finder_response ENUM(
+        'PENDING', 'CONFIRMED', 'REJECTED'
+    ) DEFAULT 'PENDING',
+    match_status ENUM(
+        'PENDING', 'VERIFICATION', 'REJECTED', 'COMPLETED'
+    ) DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY unique_item_pair (lost_item_id, found_item_id),
+
+    FOREIGN KEY (lost_item_id)
+        REFERENCES items(item_id),
+
+    FOREIGN KEY (found_item_id)
+        REFERENCES items(item_id)
+);*/
+
+
+
