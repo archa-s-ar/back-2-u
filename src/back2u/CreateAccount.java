@@ -95,7 +95,7 @@ public class CreateAccount extends JFrame implements ActionListener{
         back.addActionListener(this);
         add(back);
         
-        /*getContentPane().setBackground(Color.WHITE);*/
+        
         
         setSize(900,900);
         setLocation(300,0);
