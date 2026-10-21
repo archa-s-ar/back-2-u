@@ -308,7 +308,7 @@ Possible future improvements include:
 
 ## Project Status
 
-**Status: Under Development**
+**Status: Completed**
 
 Back2U is an academic Java Swing project focused on object-oriented programming, database connectivity, matching logic, notifications, and the lost-item handover workflow. Feature completion should be confirmed through testing of the current code.
 
