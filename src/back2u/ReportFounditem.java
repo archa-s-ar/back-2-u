@@ -93,13 +93,13 @@ public class ReportFounditem extends JFrame implements ActionListener{
              TimeText.setBounds(150,490,300,30);
              add(TimeText);
              
-             JLabel Location=new JLabel("Lost Location:");
+             JLabel Location=new JLabel("Found Location:");
              Location.setFont(new Font("raleway",Font.BOLD,16));
              Location.setBounds(40,540,300,30);
              add(Location);
              
              Locationtext=new JTextField();
-             Locationtext.setBounds(150,540,300,30);
+             Locationtext.setBounds(170,540,300,30);
              add(Locationtext);
              
              JLabel Additional=new JLabel("Additional information");
