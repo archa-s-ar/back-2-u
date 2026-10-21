@@ -13,7 +13,11 @@ public class ReportFounditem extends JFrame implements ActionListener{
     JTextField Itemtext, DateText, TimeText, Locationtext;
     JTextArea Descriptiontext, Uniquetext;
     JButton Cancel, Submit;
-    ReportFounditem(){
+    private final int userId;
+    
+    ReportFounditem(int userId){
+        this.userId=userId;
+        
         setTitle("Report Found Item");
         setSize(900,820);
         setLocation(300,0);
@@ -188,43 +192,37 @@ public class ReportFounditem extends JFrame implements ActionListener{
 
                     // Insert the report into the existing items table
                     String query =
-                            "INSERT INTO items " +
-                            "(report_type, item_name, category, description, " +
-                            "date_occurred, time_occurred, location, status, " +
-                            "unique_details) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO items " +
+        "(user_id, report_type, item_name, category, description, " +
+        "date_occurred, time_occurred, location, status, unique_details) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-                    try (PreparedStatement ps =
-                            con.c.prepareStatement(query)) {
+                    try (PreparedStatement ps = con.c.prepareStatement(query)) {
 
-                        ps.setString(1, "FOUND");
-                        ps.setString(2, itemName);
-                        ps.setString(3, itemCategory);
-                        ps.setString(4, description);
-                        ps.setDate(5,
-                                java.sql.Date.valueOf(foundDate));
-                        ps.setString(6, time);
-                        ps.setString(7, location);
-                        ps.setString(8, "OPEN");
-                        ps.setString(9, uniqueDetails);
+                    ps.setInt(1, userId);
+                    ps.setString(2, "FOUND");
+                    ps.setString(3, itemName);
+                     ps.setString(4, itemCategory);
+                    ps.setString(5, description);
+                    ps.setDate(6, java.sql.Date.valueOf(foundDate));
+                    ps.setString(7, time);
+                    ps.setString(8, location);
+                    ps.setString(9, "OPEN");
+                    ps.setString(10, uniqueDetails);
 
-                        int rows = ps.executeUpdate();
+                    int rows = ps.executeUpdate();
 
-                        if (rows > 0) {
-                            JOptionPane.showMessageDialog(
-                                    this,
-                                    "Found item reported successfully!");
+                if (rows > 0) {JOptionPane.showMessageDialog(this,"Found item reported successfully!");
 
-                            // Clear fields after successful insertion
-                            Itemtext.setText("");
-                            Descriptiontext.setText("");
-                            DateText.setText("");
-                            TimeText.setText("");
-                            Locationtext.setText("");
-                            Uniquetext.setText("");
-                            category.setSelectedIndex(0);
-                        }
-                    }
+        Itemtext.setText("");
+        Descriptiontext.setText("");
+        DateText.setText("");
+        TimeText.setText("");
+        Locationtext.setText("");
+        Uniquetext.setText("");
+        category.setSelectedIndex(0);
+    }
+}
 
                     con.c.close();
 
@@ -247,7 +245,7 @@ public class ReportFounditem extends JFrame implements ActionListener{
         }
     }
 
-     public static void main (String args[]){
-        new ReportFounditem();
-     }
+     public static void main(String[] args) {
+    SwingUtilities.invokeLater(() -> new ReportFounditem(1));
+}
 }

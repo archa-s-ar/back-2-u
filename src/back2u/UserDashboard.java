@@ -6,7 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class UserDashboard extends JFrame implements ActionListener{
-    JButton lostBtn,foundBtn,notificationsBtn,adminBtn;
+    JButton lostBtn,foundBtn,notificationsBtn,adminBtn,logout;
     private final int userId;
     
     UserDashboard(int userId){
@@ -15,7 +15,7 @@ public class UserDashboard extends JFrame implements ActionListener{
         setLayout(null);
         setTitle("WELCOME");
         
-        JPanel options = new JPanel(new GridLayout(2,2,10,10));
+        JPanel options = new JPanel(new GridLayout(3, 2, 10, 10));
         options.setBounds(120, 400, 900, 300);
 
         lostBtn = new JButton("Report Lost Item");
@@ -26,11 +26,13 @@ public class UserDashboard extends JFrame implements ActionListener{
         notificationsBtn.addActionListener(this);
         adminBtn = new JButton("Report to Admin");
         adminBtn.addActionListener(this);
+        logout = new JButton("Logout");
+        logout.addActionListener(this);
 
         
         Font buttonFont = new Font("Raleway", Font.BOLD, 18);
 
-        JButton[] buttons = {lostBtn, foundBtn, notificationsBtn, adminBtn};
+        JButton[] buttons = {lostBtn, foundBtn, notificationsBtn, adminBtn,logout};
 
         for (JButton button : buttons) {
             button.setFont(buttonFont);
@@ -43,6 +45,7 @@ public class UserDashboard extends JFrame implements ActionListener{
         options.add(foundBtn);
         options.add(notificationsBtn);
         options.add(adminBtn);
+        options.add(logout);
 
         add(options);
         
@@ -67,19 +70,21 @@ public class UserDashboard extends JFrame implements ActionListener{
 
     if (e.getSource() == lostBtn) {
         new ReportLostItem(userId).setVisible(true);
-    }
-    else if (e.getSource() == foundBtn) {
-        new ReportFounditem().setVisible(true);
-    }
-    else if (e.getSource() == notificationsBtn) {
-        JOptionPane.showMessageDialog(
-            this, "Notifications will be available here."
-        );
-    }
-    else if (e.getSource() == adminBtn) {
+
+    } else if (e.getSource() == foundBtn) {
+        new ReportFounditem(userId).setVisible(true);
+
+    } else if (e.getSource() == notificationsBtn) {
+        new Notifications(userId).setVisible(true);
+
+    } else if (e.getSource() == adminBtn) {
         new AdminReport(userId).setVisible(true);
     }
-}
+    else if (e.getSource() == logout) {
+        setVisible(false);
+        new Login().setVisible(true);
+    }
+    }
     
     public static void main (String[] args){
         new UserDashboard(1);
