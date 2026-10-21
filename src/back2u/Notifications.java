@@ -6,6 +6,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
+import java.sql.*;
 
 public class Notifications extends JFrame {
 
@@ -48,11 +49,13 @@ public class Notifications extends JFrame {
         JButton rejectButton = new JButton("Not a Match");
         JButton refreshButton = new JButton("Refresh");
         JButton closeButton = new JButton("Close");
+        JButton checkStatusButton = new JButton("Check Status");
 
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 12));
         buttons.add(viewButton);
         buttons.add(matchButton);
         buttons.add(rejectButton);
+        buttons.add(checkStatusButton);
         buttons.add(refreshButton);
         buttons.add(closeButton);
 
@@ -63,6 +66,7 @@ public class Notifications extends JFrame {
         rejectButton.addActionListener(e -> respond(false));
         refreshButton.addActionListener(e -> loadNotifications());
         closeButton.addActionListener(e -> dispose());
+        checkStatusButton.addActionListener(e -> checkStatus());
 
         loadNotifications();
     }
@@ -191,26 +195,26 @@ public class Notifications extends JFrame {
             String message;
 
             if ("REJECTED".equals(n.status)) {
-                message = "This match was rejected.";
+    message = "This match was rejected.";
 
-            } else if ("COMPLETED".equals(n.status)) {
-                message = "This match is completed.";
+} else if ("COMPLETED".equals(n.status)) {
+    message = "This match is completed.";
 
-            } else if ("FINDER".equals(n.role)
-                    && "CONFIRMED".equals(n.ownerResponse)) {
-                message = "The owner has confirmed this match!";
+} else if ("CONFIRMED".equals(n.ownerResponse)
+        && "CONFIRMED".equals(n.finderResponse)) {
+    message = "Both users confirmed! Match verified.";
 
-            } else if ("OWNER".equals(n.role)
-                    && "CONFIRMED".equals(n.myResponse)) {
-                message = "You confirmed. Waiting for finder.";
+} else if ("OWNER".equals(n.role)
+        && "CONFIRMED".equals(n.myResponse)) {
+    message = "You confirmed. Waiting for finder.";
 
-            } else if ("FINDER".equals(n.role)
-                    && "CONFIRMED".equals(n.myResponse)) {
-                message = "You confirmed. Waiting for owner.";
+} else if ("FINDER".equals(n.role)
+        && "CONFIRMED".equals(n.myResponse)) {
+    message = "You confirmed. Waiting for owner.";
 
-            } else {
-                message = "A possible match needs your review.";
-            }
+} else {
+    message = "A possible match needs your review.";
+}
 
             model.addRow(new Object[] {
                 n.lostName,
@@ -234,6 +238,7 @@ public class Notifications extends JFrame {
         showError(ex);
     }
 }
+    
 
     private void showError(Exception ex) {
         ex.printStackTrace();
@@ -244,4 +249,70 @@ public class Notifications extends JFrame {
             "Back2U Error",
             JOptionPane.ERROR_MESSAGE);
     }
+    
+    private void checkStatus() {
+    MatchNotificationService.Notification n =
+            selectedNotification();
+
+    if (n == null) {
+        return;
+    }
+
+    String sql =
+            "SELECT lost.status AS lost_status, " +
+            "found.status AS found_status " +
+            "FROM items lost " +
+            "JOIN items found ON found.item_id = ? " +
+            "WHERE lost.item_id = ? " +
+            "AND lost.report_type = 'LOST' " +
+            "AND found.report_type = 'FOUND'";
+
+    try (Connection con = new Conn().c;
+         PreparedStatement ps = con.prepareStatement(sql)) {
+
+        ps.setInt(1, n.foundItemId);
+        ps.setInt(2, n.lostItemId);
+
+        try (ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                String lostStatus = rs.getString("lost_status");
+                String foundStatus = rs.getString("found_status");
+
+                if ("MATCHED".equalsIgnoreCase(lostStatus)
+                        && "MATCHED".equalsIgnoreCase(foundStatus)) {
+
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Both items are matched! Opening details...",
+                            "Match Confirmed",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+
+                    new DetailsMatch(n.lostItemId, n.foundItemId);
+
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Item not matched yet.\n" +
+                            "Both the owner and finder must confirm the match.",
+                            "Match Status",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                }
+
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Unable to find these item records.",
+                        "Match Status",
+                        JOptionPane.WARNING_MESSAGE
+                );
+            }
+        }
+
+    } catch (SQLException ex) {
+        showError(ex);
+    }
+}
 }
