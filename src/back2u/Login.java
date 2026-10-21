@@ -98,7 +98,7 @@ public class Login extends JFrame implements ActionListener{
              try {
             Conn con = new Conn();
 
-            String query = "SELECT * FROM users WHERE email='"
+            String query = "SELECT * FROM accountdetails WHERE email='"
                     + mail + "' AND password='" + Pass + "'";
 
            java.sql.ResultSet rs = con.s.executeQuery(query);
@@ -124,21 +124,21 @@ public class Login extends JFrame implements ActionListener{
           }
         }
     
-     else if(ev.getSource()==forgot){
-     String mail=JOptionPane.showInputDialog(this,"Enter your registered email address:");
-     if(mail!=null&&mail.trim().isEmpty()){
-         JOptionPane.showMessageDialog(this,"please enter your email address.");
-     }
-     else if(mail!=null){
-         JOptionPane.showMessageDialog(this,"Password reset request submitted for "+mail.trim());
-     }
+     
+     else if (ev.getSource() == forgot) {
+    dispose();
+    new Forgotpassword();
      }
      else if (ev.getSource() == createacc) {
             setVisible(false);
             new CreateAccount().setVisible(true);
             dispose();
      }
- }
+     
+
+}
+
+ 
  
   
 
