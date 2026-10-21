@@ -7,35 +7,40 @@ import java.util.List;
 
 public class MatchNotificationService {
 
-    public static class Notification {
-        public int matchId;
-        public int lostItemId;
-        public int foundItemId;
-        public int score;
-        public String lostName;
-        public String foundName;
-        public String location;
-        public String status;
-        public String role;
-        public String myResponse;
+    
+public static class Notification {
+    public String ownerResponse;
+    public int matchId;
+    public int lostItemId;
+    public int foundItemId;
+    public int score;
+    public String lostName;
+    public String foundName;
+    public String location;
+    public String status;
+    public String role;
+    public String myResponse;
 
-        public Notification(
-                int matchId, int lostItemId, int foundItemId,
-                int score, String lostName, String foundName,
-                String location, String status, String role,
-                String myResponse) {
-            this.matchId = matchId;
-            this.lostItemId = lostItemId;
-            this.foundItemId = foundItemId;
-            this.score = score;
-            this.lostName = lostName;
-            this.foundName = foundName;
-            this.location = location;
-            this.status = status;
-            this.role = role;
-            this.myResponse = myResponse;
-        }
+    public Notification(
+            int matchId, int lostItemId, int foundItemId,
+            int score, String lostName, String foundName,
+            String location, String status, String role,
+            String myResponse, String ownerResponse) {
+
+        this.matchId = matchId;
+        this.lostItemId = lostItemId;
+        this.foundItemId = foundItemId;
+        this.score = score;
+        this.lostName = lostName;
+        this.foundName = foundName;
+        this.location = location;
+        this.status = status;
+        this.role = role;
+        this.myResponse = myResponse;
+        this.ownerResponse = ownerResponse;
     }
+}
+
 
     // Generate candidate pairs and store them only once.
     public static void refreshMatches() throws SQLException {
@@ -101,16 +106,18 @@ public class MatchNotificationService {
                             : rs.getString("finder_response");
 
                     result.add(new Notification(
-                        rs.getInt("match_id"),
-                        rs.getInt("lost_item_id"),
-                        rs.getInt("found_item_id"),
-                        rs.getInt("match_score"),
-                        rs.getString("lost_name"),
-                        rs.getString("found_name"),
-                        rs.getString("found_location"),
-                        rs.getString("match_status"),
-                        role,
-                        response
+                            
+                    rs.getInt("match_id"),
+                    rs.getInt("lost_item_id"),
+                    rs.getInt("found_item_id"),
+                    rs.getInt("match_score"),
+                    rs.getString("lost_name"),
+                    rs.getString("found_name"),
+                    rs.getString("found_location"),
+                    rs.getString("match_status"),
+                    role,
+                    response,
+                    rs.getString("owner_response")
                     ));
                 }
             }
@@ -155,63 +162,109 @@ public class MatchNotificationService {
 
     // Save the response from the logged-in owner or finder.
     public static void respond(
-            int matchId, int userId, boolean confirmed)
-            throws SQLException {
+        int matchId, int userId, boolean confirmed)
+        throws SQLException {
 
-        String response = confirmed ? "CONFIRMED" : "REJECTED";
+    String response = confirmed ? "CONFIRMED" : "REJECTED";
 
-        String sql =
-            "UPDATE item_matches im " +
-            "JOIN items lost ON lost.item_id = im.lost_item_id " +
-            "JOIN items found ON found.item_id = im.found_item_id " +
-            "SET " +
-            "im.owner_response = CASE " +
-            "WHEN lost.user_id = ? THEN ? " +
-            "ELSE im.owner_response END, " +
-            "im.finder_response = CASE " +
-            "WHEN found.user_id = ? THEN ? " +
-            "ELSE im.finder_response END, " +
-            "im.match_status = CASE " +
-            "WHEN ? = 'REJECTED' OR " +
-            "(lost.user_id = ? AND im.finder_response = 'REJECTED') OR " +
-            "(found.user_id = ? AND im.owner_response = 'REJECTED') " +
-            "THEN 'REJECTED' " +
-            "WHEN (lost.user_id = ? AND ? = 'CONFIRMED' " +
-            "AND im.finder_response = 'CONFIRMED') OR " +
-            "(found.user_id = ? AND ? = 'CONFIRMED' " +
-            "AND im.owner_response = 'CONFIRMED') " +
-            "THEN 'VERIFICATION' " +
-            "ELSE 'PENDING' END " +
-            "WHERE im.match_id = ? " +
-            "AND (lost.user_id = ? OR found.user_id = ?) " +
-            "AND im.match_status NOT IN ('REJECTED', 'COMPLETED')";
+    String sql =
+        "UPDATE item_matches im " +
+        "JOIN items lost ON lost.item_id = im.lost_item_id " +
+        "JOIN items found ON found.item_id = im.found_item_id " +
+        "SET " +
+        "im.owner_response = CASE " +
+        "WHEN lost.user_id = ? THEN ? " +
+        "ELSE im.owner_response END, " +
+        "im.finder_response = CASE " +
+        "WHEN found.user_id = ? THEN ? " +
+        "ELSE im.finder_response END, " +
+        "im.match_status = CASE " +
+        "WHEN ? = 'REJECTED' THEN 'REJECTED' " +
+        "ELSE im.match_status END " +
+        "WHERE im.match_id = ? " +
+        "AND (lost.user_id = ? OR found.user_id = ?) " +
+        "AND im.match_status NOT IN ('REJECTED', 'COMPLETED')";
 
-        try (Connection con = new Conn().c;
-             PreparedStatement ps = con.prepareStatement(sql)) {
+    try (Connection con = new Conn().c;
+         PreparedStatement ps = con.prepareStatement(sql)) {
 
-            int i = 1;
-            ps.setInt(i++, userId);
-            ps.setString(i++, response);
-            ps.setInt(i++, userId);
-            ps.setString(i++, response);
-            ps.setString(i++, response);
-            ps.setInt(i++, userId);
-            ps.setInt(i++, userId);
-            ps.setInt(i++, userId);
-            ps.setString(i++, response);
-            ps.setInt(i++, userId);
-            ps.setString(i++, response);
-            ps.setInt(i++, matchId);
-            ps.setInt(i++, userId);
-            ps.setInt(i, userId);
+        int i = 1;
+        ps.setInt(i++, userId);
+        ps.setString(i++, response);
+        ps.setInt(i++, userId);
+        ps.setString(i++, response);
+        ps.setString(i++, response);
+        ps.setInt(i++, matchId);
+        ps.setInt(i++, userId);
+        ps.setInt(i, userId);
 
-            int updated = ps.executeUpdate();
+        int updated = ps.executeUpdate();
 
-            if (updated == 0) {
-                throw new SQLException(
-                    "Response not saved. Check the notification or its status."
-                );
+        if (updated == 0) {
+            throw new SQLException(
+                "Response not saved. Check the notification or its status."
+            );
+        }
+
+        // Check the saved responses and update both item statuses.
+        updateMatchStatus(matchId, con);
+    }
+}
+    
+    private static void updateMatchStatus(
+        int matchId, Connection con) throws SQLException {
+
+    String checkSql =
+        "SELECT owner_response, finder_response " +
+        "FROM item_matches WHERE match_id = ?";
+
+    String ownerResponse;
+    String finderResponse;
+
+    try (PreparedStatement ps = con.prepareStatement(checkSql)) {
+        ps.setInt(1, matchId);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (!rs.next()) {
+                throw new SQLException("Match not found.");
             }
+
+            ownerResponse = rs.getString("owner_response");
+            finderResponse = rs.getString("finder_response");
         }
     }
+
+    if ("CONFIRMED".equals(ownerResponse)
+            && "CONFIRMED".equals(finderResponse)) {
+
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE item_matches SET match_status = 'VERIFICATION' " +
+                "WHERE match_id = ?")) {
+            ps.setInt(1, matchId);
+            ps.executeUpdate();
+        }
+
+        updateItemStatuses(matchId, con);
+    }
+}
+    
+    private static void updateItemStatuses(
+        int matchId, Connection con) throws SQLException {
+
+    String sql =
+        "UPDATE items i " +
+        "JOIN item_matches im ON " +
+        "(i.item_id = im.lost_item_id OR " +
+        "i.item_id = im.found_item_id) " +
+        "SET i.status = 'MATCHED' " +
+        "WHERE im.match_id = ? " +
+        "AND im.owner_response = 'CONFIRMED' " +
+        "AND im.finder_response = 'CONFIRMED' " +
+        "AND im.match_status = 'VERIFICATION'";
+
+    try (PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setInt(1, matchId);
+        ps.executeUpdate();
+    }
+}
 }

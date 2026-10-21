@@ -9,6 +9,7 @@ import java.util.List;
 
 public class Notifications extends JFrame {
 
+    
     private final int userId;
     private JTable table;
     private DefaultTableModel model;
@@ -30,16 +31,12 @@ public class Notifications extends JFrame {
         add(heading, BorderLayout.NORTH);
 
         model = new DefaultTableModel(
-            new String[] {
-                "Lost Item", "Found Item", "Location",
-                "Score", "Your Role", "Your Response", "Match Status"
-            }, 0
-        ) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
+    new String[] {"Lost Item", "Found Item", "Location","Score", "Your Role", "Your Response","Match Status", "Notification Message"}, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
 
         table = new JTable(model);
         table.setRowHeight(27);
@@ -183,35 +180,60 @@ public class Notifications extends JFrame {
     }
 
     private void loadNotifications() {
-        model.setRowCount(0);
+    model.setRowCount(0);
 
-        try {
-            notifications =
-                MatchNotificationService.getNotifications(userId);
+    try {
+        notifications =
+            MatchNotificationService.getNotifications(userId);
 
-            for (MatchNotificationService.Notification n : notifications) {
-                model.addRow(new Object[] {
-                    n.lostName,
-                    n.foundName,
-                    n.location,
-                    n.score + "/100",
-                    n.role,
-                    n.myResponse,
-                    n.status
-                });
-            }
+        for (MatchNotificationService.Notification n : notifications) {
 
-            if (notifications.isEmpty()) {
-                // No error: the user simply has no candidate matches.
-                setTitle("Back2U - Notifications (No matches yet)");
+            String message;
+
+            if ("REJECTED".equals(n.status)) {
+                message = "This match was rejected.";
+
+            } else if ("COMPLETED".equals(n.status)) {
+                message = "This match is completed.";
+
+            } else if ("FINDER".equals(n.role)
+                    && "CONFIRMED".equals(n.ownerResponse)) {
+                message = "The owner has confirmed this match!";
+
+            } else if ("OWNER".equals(n.role)
+                    && "CONFIRMED".equals(n.myResponse)) {
+                message = "You confirmed. Waiting for finder.";
+
+            } else if ("FINDER".equals(n.role)
+                    && "CONFIRMED".equals(n.myResponse)) {
+                message = "You confirmed. Waiting for owner.";
+
             } else {
-                setTitle("Back2U - Notifications");
+                message = "A possible match needs your review.";
             }
 
-        } catch (SQLException ex) {
-            showError(ex);
+            model.addRow(new Object[] {
+                n.lostName,
+                n.foundName,
+                n.location,
+                n.score + "/100",
+                n.role,
+                n.myResponse,
+                n.status,
+                message
+            });
         }
+
+        if (notifications.isEmpty()) {
+            setTitle("Back2U - Notifications (No matches yet)");
+        } else {
+            setTitle("Back2U - Notifications");
+        }
+
+    } catch (SQLException ex) {
+        showError(ex);
     }
+}
 
     private void showError(Exception ex) {
         ex.printStackTrace();
