@@ -34,36 +34,28 @@ SELECT * FROM items;
 CREATE DATABASE IF NOT EXISTS back2u;
 USE back2u;
 
-/*CREATE TABLE IF NOT EXISTS handover (
-    handover_id INT PRIMARY KEY AUTO_INCREMENT,
-    item_name VARCHAR(100),
-    category VARCHAR(50),
-    description VARCHAR(255),
-    found_date DATE,
-    found_location VARCHAR(100),
-    owner_name VARCHAR(100),
-    reg_no VARCHAR(30),
-    phone VARCHAR(15),
-    meeting_location VARCHAR(100),
-    meeting_date DATE,
-    meeting_time VARCHAR(20),
-    pin VARCHAR(6),
-    status VARCHAR(20) DEFAULT 'PENDING',
-    returned_at DATETIME
+/*CREATE TABLE handover (
+    handover_id INT AUTO_INCREMENT PRIMARY KEY,
+    match_id INT NOT NULL UNIQUE,
+
+    meeting_location VARCHAR(200) NOT NULL,
+    meeting_date DATE NOT NULL,
+    meeting_time VARCHAR(20) NOT NULL,
+    instructions VARCHAR(500),
+
+    pin VARCHAR(6) NOT NULL,
+    status ENUM('PENDING', 'COMPLETED')
+        DEFAULT 'PENDING',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    returned_at DATETIME NULL,
+
+    CONSTRAINT fk_handover_match
+        FOREIGN KEY (match_id)
+        REFERENCES item_matches(match_id)
 );*/
 
-/*INSERT INTO handover (
-    item_name, category, description, found_date,
-    found_location, owner_name, reg_no, phone,
-    meeting_location, meeting_date, meeting_time, pin
-) VALUES (
-    'Black Wireless Earbuds', 'Electronics',
-    'Wireless earbuds with charging case',
-    '2026-10-12', 'Main Block',
-    'Archa S', '22IT3456', '9876543210',
-    'Main Block (Entrance)', '2026-10-16',
-    '3:30 PM', '478291'
-);*/
+
 
 /*CREATE TABLE admin_reports (
     report_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -105,6 +97,5 @@ SELECT * from admin_reports;
         REFERENCES items(item_id)
 );*/
 
-SELECT * FROM items;
 
 

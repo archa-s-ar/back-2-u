@@ -9,11 +9,14 @@ public class handover extends JFrame {
     private JTextArea detailsArea;
     private JButton loadButton;
     private JButton enterPinButton;
-
+    private int matchId;
+    
     private int handoverId = -1;
     private String correctPin = "";
 
-    public handover() {
+    public handover(int matchId) {
+        
+        this.matchId=matchId;
         setTitle("Back2U - Handover Details");
         setSize(500, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -54,95 +57,64 @@ public class handover extends JFrame {
         enterPinButton.addActionListener(e -> openPinWindow());
     }
 
-    private void loadDetails() {
+    
+private void loadDetails() {
+    String query =
+        "SELECT h.handover_id, h.meeting_location, " +
+        "h.meeting_date, h.meeting_time, h.instructions, " +
+        "h.status, h.pin " +
+        "FROM handover h " +
+        "WHERE h.match_id = ?";
 
-        // Fetch the latest handover record
-        String query =
-            "SELECT * FROM handover " +
-            "ORDER BY handover_id DESC LIMIT 1";
+    try (Connection con = new Conn().c) {
+        if (con == null) {
+            JOptionPane.showMessageDialog(
+                this, "Database connection failed.");
+            return;
+        }
 
-        try {
-            Conn con = new Conn();
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setInt(1, matchId);
 
-            if (con.c == null) {
-                JOptionPane.showMessageDialog(
-                    this, "Database connection failed. Check Conn.java.");
-                return;
-            }
-
-            try (PreparedStatement stmt = con.c.prepareStatement(query);
-                 ResultSet rs = stmt.executeQuery()) {
-
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-
                     handoverId = rs.getInt("handover_id");
                     correctPin = rs.getString("pin");
 
-                    StringBuilder sb = new StringBuilder();
+                    String status = rs.getString("status");
 
-                    sb.append("ITEM INFORMATION\n");
-                    sb.append("----------------\n");
-                    sb.append("Item: ")
-                        .append(rs.getString("item_name")).append("\n");
-                    sb.append("Category: ")
-                        .append(rs.getString("category")).append("\n");
-                    sb.append("Description: ")
-                        .append(rs.getString("description")).append("\n");
-                    sb.append("Found Date: ")
-                        .append(rs.getDate("found_date")).append("\n");
-                    sb.append("Found Location: ")
-                        .append(rs.getString("found_location")).append("\n\n");
+                    detailsArea.setText(
+                        "HANDOVER ARRANGEMENT\n" +
+                        "--------------------\n" +
+                        "Location: " + rs.getString("meeting_location") + "\n" +
+                        "Date: " + rs.getDate("meeting_date") + "\n" +
+                        "Time: " + rs.getString("meeting_time") + "\n" +
+                        "Instructions: " + rs.getString("instructions") + "\n\n" +
+                        "Status: " + status
+                    );
 
-                    sb.append("OWNER INFORMATION\n");
-                    sb.append("-----------------\n");
-                    sb.append("Owner: ")
-                        .append(rs.getString("owner_name")).append("\n");
-                    sb.append("Registration: ")
-                        .append(rs.getString("reg_no")).append("\n");
-                    sb.append("Phone: ")
-                        .append(rs.getString("phone")).append("\n\n");
-
-                    sb.append("MEETING DETAILS\n");
-                    sb.append("---------------\n");
-                    sb.append("Location: ")
-                        .append(rs.getString("meeting_location")).append("\n");
-                    sb.append("Date: ")
-                        .append(rs.getDate("meeting_date")).append("\n");
-                    sb.append("Time: ")
-                        .append(rs.getString("meeting_time")).append("\n");
-
-                    detailsArea.setText(sb.toString());
-                    enterPinButton.setEnabled(true);
+                    enterPinButton.setEnabled(
+                        "PENDING".equalsIgnoreCase(status));
 
                 } else {
                     handoverId = -1;
                     correctPin = "";
-                    detailsArea.setText("");
+                    detailsArea.setText(
+                        "No handover arrangement has been created for this match.");
                     enterPinButton.setEnabled(false);
-
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "No handover details found in database.",
-                        "Not Found",
-                        JOptionPane.WARNING_MESSAGE
-                    );
-                }
-            } finally {
-                if (con.c != null) {
-                    con.c.close();
                 }
             }
-
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(
-                this,
-                "Database error: " + ex.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE
-            );
-            ex.printStackTrace();
         }
+    } catch (SQLException ex) {
+        showError("Could not load handover details: " + ex.getMessage());
     }
+}
+
+private void showError(String message) {
+    JOptionPane.showMessageDialog(
+        this, message, "Handover Error", JOptionPane.ERROR_MESSAGE);
+}
+
 
     private void openPinWindow() {
 
@@ -191,15 +163,8 @@ public class handover extends JFrame {
             if (enteredPin.equals(correctPin)) {
 
                 if (updateHandoverStatus()) {
-                    JOptionPane.showMessageDialog(
-                        pinDialog,
-                        "Handover completed successfully!",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE
-                    );
-
                     pinDialog.dispose();
-                    enterPinButton.setEnabled(false);
+                    loadDetails();
                 }
 
             } else {
@@ -217,58 +182,123 @@ public class handover extends JFrame {
 
     private boolean updateHandoverStatus() {
 
-        String updateSql =
-            "UPDATE handover " +
-            "SET status = 'COMPLETED', returned_at = NOW() " +
-            "WHERE handover_id = ? AND status <> 'COMPLETED'";
+    String handoverSql =
+        "UPDATE handover " +
+        "SET status = 'COMPLETED', returned_at = NOW() " +
+        "WHERE handover_id = ? AND status = 'PENDING'";
 
-        try {
-            Conn con = new Conn();
+    String matchSql =
+        "UPDATE item_matches " +
+        "SET match_status = 'COMPLETED' " +
+        "WHERE match_id = ? " +
+        "AND match_status = 'VERIFICATION' " +
+        "AND owner_response = 'CONFIRMED' " +
+        "AND finder_response = 'CONFIRMED'";
 
-            if (con.c == null) {
-                JOptionPane.showMessageDialog(
-                    this, "Database connection failed.");
-                return false;
-            }
+    String itemsSql =
+        "UPDATE items " +
+        "SET status = 'COMPLETED' " +
+        "WHERE item_id IN (?, ?) " +
+        "AND status = 'MATCHED'";
 
-            try (PreparedStatement stmt =
-                     con.c.prepareStatement(updateSql)) {
+    try (Connection con = new Conn().c) {
 
-                stmt.setInt(1, handoverId);
-
-                int rows = stmt.executeUpdate();
-
-                if (rows > 0) {
-                    return true;
-                }
-
-                JOptionPane.showMessageDialog(
-                    this,
-                    "This handover may already be completed. Reload the details."
-                );
-
-                return false;
-
-            } finally {
-                if (con.c != null) {
-                    con.c.close();
-                }
-            }
-
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(
-                this,
-                "Could not update handover status: " + ex.getMessage(),
-                "Database Error",
-                JOptionPane.ERROR_MESSAGE
-            );
-
-            ex.printStackTrace();
+        if (con == null) {
+            showError("Database connection failed.");
             return false;
         }
+
+        con.setAutoCommit(false);
+
+        try {
+            // 1. Complete the handover
+            try (PreparedStatement ps =
+                     con.prepareStatement(handoverSql)) {
+
+                ps.setInt(1, handoverId);
+
+                if (ps.executeUpdate() != 1) {
+                    throw new SQLException(
+                        "Handover is already completed or unavailable.");
+                }
+            }
+
+            // 2. Complete the match
+            try (PreparedStatement ps =
+                     con.prepareStatement(matchSql)) {
+
+                ps.setInt(1, matchId);
+
+                if (ps.executeUpdate() != 1) {
+                    throw new SQLException(
+                        "Match is not in the expected verification state.");
+                }
+            }
+
+            // 3. Complete both items
+            String getItemsSql =
+                "SELECT lost_item_id, found_item_id " +
+                "FROM item_matches WHERE match_id = ?";
+
+            int lostItemId;
+            int foundItemId;
+
+            try (PreparedStatement ps =
+                     con.prepareStatement(getItemsSql)) {
+
+                ps.setInt(1, matchId);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        throw new SQLException("Match not found.");
+                    }
+
+                    lostItemId = rs.getInt("lost_item_id");
+                    foundItemId = rs.getInt("found_item_id");
+                }
+            }
+
+            try (PreparedStatement ps =
+                     con.prepareStatement(itemsSql)) {
+
+                ps.setInt(1, lostItemId);
+                ps.setInt(2, foundItemId);
+
+                if (ps.executeUpdate() != 2) {
+                    throw new SQLException(
+                        "Could not update both item statuses.");
+                }
+            }
+
+            con.commit();
+
+            JOptionPane.showMessageDialog(
+                this,
+                "Handover completed successfully!",
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+
+            return true;
+
+        } catch (SQLException ex) {
+            con.rollback();
+            showError("Handover completion failed: " + ex.getMessage());
+            return false;
+
+        } finally {
+            con.setAutoCommit(true);
+        }
+
+    } catch (SQLException ex) {
+        showError("Database error: " + ex.getMessage());
+        return false;
     }
+}
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new handover().setVisible(true));
-    }
+    SwingUtilities.invokeLater(() -> {
+        new handover(48).setVisible(true);
+    });
+}
 }

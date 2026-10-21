@@ -289,7 +289,14 @@ public class Notifications extends JFrame {
                             JOptionPane.INFORMATION_MESSAGE
                     );
 
-                    new DetailsMatch(n.lostItemId, n.foundItemId);
+                    if ("OWNER".equalsIgnoreCase(n.role)) {
+
+                    new DetailsMatch(n.lostItemId,n.foundItemId,n.matchId,userId);
+
+                } else if ("FINDER".equalsIgnoreCase(n.role)) {
+
+                new handover(n.matchId).setVisible(true);
+                }
 
                 } else {
                     JOptionPane.showMessageDialog(
