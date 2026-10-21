@@ -6,6 +6,9 @@ import java.awt.*;
 import java.sql.*;
 
 public class DetailsMatch extends JFrame {
+    
+    private int ownerUserId;
+    private int matchId;
 
     private int lostItemId;
     private int foundItemId;
@@ -23,10 +26,13 @@ public class DetailsMatch extends JFrame {
 
     JPanel itemPanel, finderPanel, buttonPanel;
 
-    public DetailsMatch(int lostItemId, int foundItemId) {
+    public DetailsMatch(
+        int lostItemId, int foundItemId,int matchId, int ownerUserId) {
 
         this.lostItemId = lostItemId;
         this.foundItemId = foundItemId;
+        this.matchId = matchId;
+        this.ownerUserId = ownerUserId;
 
         setTitle("DETAILS MATCH");
         setLayout(null);
@@ -71,29 +77,26 @@ public class DetailsMatch extends JFrame {
         addDetail(finderPanel, "Student ID:", finderStudentId, 85);
         addDetail(finderPanel, "Phone Number:", finderPhone, 120);
 
-        JButton contactButton = new JButton("Contact Finder");
-        contactButton.setBounds(80, 580, 180, 40);
+        JButton contactButton = new JButton("Contact Finder for Handover");
+        contactButton.setBounds(200, 580, 300, 40);
         contactButton.setFont(new Font("Raleway", Font.BOLD, 15));
         add(contactButton);
 
         JButton cancelButton = new JButton("Cancel Proceeding");
-        cancelButton.setBounds(310, 580, 250, 40);
+        cancelButton.setBounds(220, 630, 250, 40);
         cancelButton.setFont(new Font("Raleway", Font.BOLD, 15));
         add(cancelButton);
 
         contactButton.addActionListener(e -> {
+    if ("Not found".equals(finderName.getText())
+            || "Not linked to a user".equals(finderName.getText())) {
+        JOptionPane.showMessageDialog(
+            this, "Finder information is unavailable.");
+        return;
+    }
 
-            if ("Not found".equals(finderName.getText())) {
-                JOptionPane.showMessageDialog(this,"Finder information is unavailable.");
-            } 
-            else {
-                JOptionPane.showMessageDialog(this,
-                        "Finder: " + finderName.getText()
-                        + "\nPhone: " + finderPhone.getText(),
-                        "Contact Finder",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
+    new HandoverArrangement(matchId, ownerUserId).setVisible(true);
+});
 
         cancelButton.addActionListener(e -> {
             int answer = JOptionPane.showConfirmDialog(this,
@@ -107,7 +110,7 @@ public class DetailsMatch extends JFrame {
         });
 
         getContentPane().setBackground(Color.WHITE);
-        setSize(700, 700);
+        setSize(700, 750);
         setLocationRelativeTo(null);
         loadDetails();
         setVisible(true);
@@ -220,7 +223,7 @@ try (PreparedStatement ps = conn.c.prepareStatement(finderQuery)) {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new DetailsMatch(1, 3);
+            new DetailsMatch(1, 3, 1, 1);
         });
     }
 }
