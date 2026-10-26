@@ -80,10 +80,10 @@ Once both parties confirm a match, the owner can create an arrangement containin
 - Instructions
 - A generated six-digit PIN
 
-The handover record is stored in MySQL and is associated with a match. The intended completion workflow verifies the PIN and updates the relevant handover, match, and item statuses. Test this workflow end to end before treating it as complete.
+The handover record is stored in MySQL and is associated with a match. The intended completion workflow verifies the PIN and updates the relevant handover, match, and item statuses.
 
 ### Admin pages
-The repository includes admin-related classes such as `AdminDashboard.java` and `AdminReport.java`. The available actions and access controls should be verified in the running application.
+The repository includes admin-related classes such as `AdminDashboard.java` and `AdminReport.java`.
 
 ---
 
@@ -309,8 +309,6 @@ Possible future improvements include:
 ## Project Status
 
 **Status: Completed**
-
-Back2U is an academic Java Swing project focused on object-oriented programming, database connectivity, matching logic, notifications, and the lost-item handover workflow. Feature completion should be confirmed through testing of the current code.
 
 ---
 
